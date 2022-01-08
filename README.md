@@ -204,7 +204,7 @@ commonLabels:
 resources:
   - namespace.yaml
 
-namespace: de
+namespace: dev
 ```
 
 Here, you can see that there are several sections. Let’s look at each of them in detail:
