@@ -20,4 +20,54 @@ You would also need to fork https://github.com/bharatmicrosystems/kustomize-exam
 
 We would also need to install Kustomize. So, let’s look at that in the next section.
 
+### Installing Kustomize
+There are various ways to install Kustomize, which you can find in https://kubectl.docs.kubernetes.io/installation/kustomize/. In our case, we’ll use the binary method of installing it.
+To do so, run the following commands:
+
+```ssh
+$ curl -s "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh"  | bash
+$ sudo mv kustomize /usr/bin/
+```
+
+As we’ve installed Kustomize, let’s understand the problem statement and what we’re planning to implement.
+
+### Problem Statement
+
+we have a web application that we want to deploy in several environments. It has the following environment-specific differences:
+1. It should contain an env label corresponding to the environment it is being deployed on (i.e., dev, test, and prod).
+2. It should be deployed on namespaces corresponding to the environment (i.e., dev, test, and prod).
+3. The number of replicas in the dev environment should be one, two in test, and three in prod.
+4. In the prod environment, we will implement a rolling update strategy with maxSurge 1 and maxUnavailable 1.
+
+So, let’s go ahead and look at the directory structure for that.
+
+### Directory Structure
+We will create a ``` Deployment ``` and a ``` Service ``` resource in two files — ``` deployment.yaml ```, and ``` service.yaml``` . The directory structure looks like the following:
+
+``` 
+kustomize-example-app/
+├── base
+│   ├── deployment.yaml
+│   ├── kustomization.yaml
+│   └── service.yaml
+└── overlays
+    ├── dev
+    │   ├── deployment.yaml
+    │   ├── kustomization.yaml
+    │   ├── namespace.yaml
+    │   └── service.yaml
+    ├── prod
+    │   ├── deployment.yaml
+    │   ├── kustomization.yaml
+    │   ├── namespace.yaml
+    │   └── service.yaml
+    └── test
+        ├── deployment.yaml
+        ├── kustomization.yaml
+        ├── namespace.yaml
+        └── service.yaml
+   ```
+   
+
+
 
