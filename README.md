@@ -478,8 +478,103 @@ namespace: prod
 patchesStrategicMerge:
   - deployment.yaml
  ```
- 
 This one is similar to what we had in test. Now, let’s go ahead and run ``` kustomize build ``` to see what we would get if apply it.
+
+```
+$  kustomize build overlays/prod
+apiVersion: v1
+kind: Namespace
+metadata:
+  labels:
+    env: prod
+  name: prod
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: nginx
+    env: prod
+  name: nginx-service
+  namespace: prod
+spec:
+  ports:
+  - name: http
+    port: 80
+    protocol: TCP
+    targetPort: 80
+  selector:
+    app: nginx
+    env: prod
+  type: LoadBalancer
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: nginx
+    env: prod
+  name: nginx-deployment
+  namespace: prod
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: nginx
+      env: prod
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: nginx
+        env: prod
+    spec:
+      containers:
+      - image: nginx
+        name: nginx
+        ports:
+        - containerPort: 80
+```
+And as we see, the ``` replicas ``` and the ``` strategy ``` sections have been filled correctly. Now, let’s go ahead and apply it using the following command:
+
+```
+$ kubectl apply -k overlays/prod
+namespace/prod created
+service/nginx-service created
+deployment.apps/nginx-deployment created
+```
+
+Now, let’s list all resources in the ``` prod ``` namespace and see for ourselves:
+
+```
+$ kubectl get all -n prod --show-labels
+NAME                                    READY   STATUS    RESTARTS   AGE   LABELS
+pod/nginx-deployment-755b69f8f9-659k2   1/1     Running   0          38m   app=nginx,env=prod,pod-template-hash=755b69f8f9
+pod/nginx-deployment-755b69f8f9-m4ktj   1/1     Running   0          38m   app=nginx,env=prod,pod-template-hash=755b69f8f9
+pod/nginx-deployment-755b69f8f9-n2scb   1/1     Running   0          38m   app=nginx,env=prod,pod-template-hash=755b69f8f9
+
+NAME                    TYPE           CLUSTER-IP     EXTERNAL-IP                                                              PORT(S)        AGE   LABELS
+service/nginx-service   LoadBalancer   172.20.94.61   a34e0f51f48f4461a83444d3539f2f50-963200767.us-west-2.elb.amazonaws.com   80:32348/TCP   38m   app=nginx,env=prod
+
+NAME                               READY   UP-TO-DATE   AVAILABLE   AGE   LABELS
+deployment.apps/nginx-deployment   3/3     3            3           38m   app=nginx,env=prod
+
+NAME                                          DESIRED   CURRENT   READY   AGE   LABELS
+replicaset.apps/nginx-deployment-755b69f8f9   3         3         3       38m   app=nginx,env=prod,pod-template-hash=755b69f8f9
+```
+
+And, as we see, we have three Pod ``` replicas ``` running now.
+
+
+#### Conclusion
+Obviously, this was a sneak peek into what Kustomize is and how we can use it effectively. There are a lot of other methods and ways to use Kustomize, and I think that would be an interesting piece to explore in future stories.
+Thanks for reading! I hope you enjoyed the article!
+
+
 
 
 
