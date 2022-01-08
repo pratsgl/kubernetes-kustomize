@@ -10,10 +10,15 @@ There are various ways to manage your Kubernetes resources for multiple environm
 A template-based engine works on the principle of substituting variables with values. Helm, a template-based engine, allows you to define a generic template-based manifest by declaring variable placeholders at specific places of the generic manifest. You then use a variable file to substitute the variable with values.
 An overlay-based engine works on the principle of find and replace, i.e., it searches for specific sections in the manifest and replaces them with the required values using a find, replace, and merge-based strategy. That allows you to create base manifest files, which are pretty much standard Kubernetes resource definition files and can be deployed on their own. You can then use Kustomize to further customize those files according to your requirements.
 
+### Why Kustomize
+When we do deployments across multiple environments there are cases where some things need to be changed based on the environment. kustomize helps us with that in a template-free manner. There are no ugly if-else in our templates (conditionals in templates are bad) which also makes the output of these templates as K8s native. kustomize takes the approach where we basically combine the base and apply patch to create a variant.
+
+For eg, we created ``` base ``` a starting point for any further configurations. Then based on the environment (dev/test/prod) we create overalys. In these overalys, we again specify the things to be changed referencing a base called patches. The changes are applied on top of the base and the resultant output is called a variant. So if we create 3 overlays referencing the same base we get 3 variants to deploy based on the environment. This approach helps us to keep the base as clean as possible and only fiddle with the values that change across environments.
+
 ### How Kustomize Works
-Kustomize uses a file called kustomization.yaml that contains declarative specifications to what resources need to be imported from what manifest files and what changes need to be made. Once it has processed the resources, it emits them to the standard output, which can be stored in a file or directly used with kubectl to apply it to a particular cluster.
+Kustomize uses a file called ``` kustomization.yaml ``` that contains declarative specifications to what resources need to be imported from what manifest files and what changes need to be made. Once it has processed the resources, it emits them to the standard output, which can be stored in a file or directly used with kubectl to apply it to a particular cluster.
 One of the excellent use cases of Kustomize is to manage Kubernetes resources for multiple environments. For Kustomize to work in that scenario, you would need a base directory that would contain all manifest files with all the common elements and an overlays directory that contains all the differences for a particular environment.
-To understand better, let’s look at a hands-on example.
+To understand better, let’s look at a hands-on example where we want to run 1 pod in dev env, 2 in test & 3 in prod env's 
 
 ### Prerequisites
 You will need a Kubernetes cluster running Kubernetes version 1.14 or later and the kubectl CLI of a similar version.
