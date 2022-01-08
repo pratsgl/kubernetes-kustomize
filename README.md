@@ -269,3 +269,217 @@ spec:
         ports:
         - containerPort: 80
 ```
+
+And, as we can see, it meets all our requirements.
+To apply the manifest to the Kubernetes cluster, we can use the following kubectl command:
+```
+$ kubectl apply -k overlays/dev
+namespace/dev created
+service/nginx-service created
+deployment.apps/nginx-deployment created
+```
+
+As we see, all three resources have been created. Let’s list all resources within the dev namespace using the following:
+
+```
+$ kubectl get all -n dev --show-labels
+NAME                                    READY   STATUS    RESTARTS   AGE   LABELS
+pod/nginx-deployment-75f4c7859f-7cskf   1/1     Running   0          46m   app=nginx,env=dev,pod-template-hash=75f4c7859f
+
+NAME                    TYPE           CLUSTER-IP      EXTERNAL-IP                                                               PORT(S)        AGE   LABELS
+service/nginx-service   LoadBalancer   172.20.200.14   a55e7736c03df43f792ea0668d4599f1-2025186212.us-west-2.elb.amazonaws.com   80:30333/TCP   46m   app=nginx,env=dev
+
+NAME                               READY   UP-TO-DATE   AVAILABLE   AGE   LABELS
+deployment.apps/nginx-deployment   1/1     1            1           46m   app=nginx,env=dev
+
+NAME                                          DESIRED   CURRENT   READY   AGE   LABELS
+replicaset.apps/nginx-deployment-75f4c7859f   1         1         1       46m   app=nginx,env=dev,pod-template-hash=75f4c7859f
+```
+
+Great! Now, we have a ``` Deployment ``` with one replica ``` Pod ``` exposed by a Load Balancer ``` Service ```. All these resources are deployed to the dev namespace, and contain the label ``` env: dev ```.
+Now, let’s move on to the test directory to see what we have there.
+
+#### The test configuration
+Within the ``` test ``` directory, we have the following ``` namespace.yaml ``` file:
+
+```
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: test
+```
+
+Along with that, we have the following ``` deployment.yaml ``` file:
+
+```
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-deployment # necessary for Kustomize identification
+spec:
+  replicas: 2
+```
+
+The reason for having a ``` deployment.yaml ``` file here was because we wanted to change the number of replicas in the test environment from 1 to 2.
+Now, let’s look at the ``` kustomization.yaml ``` file :
+
+```
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+bases:
+- ../../base
+
+commonLabels:
+  env: test
+
+resources:
+  - namespace.yaml
+
+namespace: test
+
+patchesStrategicMerge:
+  - deployment.yaml
+```
+
+Most of the sections are similar to the dev ``` kustomization.yaml ``` file. However, we have an additional section here, i.e.,``` patchesStrategicMerge ```. Within that, we’ve declared the ``` deployment.yaml ``` file that contains just the delta configuration (patch), i.e., the number of replicas. The ``` patchesStrategicMerge ``` will patch all resources that match the resource ``` name, kind, ``` and ``` apiVersion ``` with the configurations declared in the patch yaml files.
+
+When we run a kustomize build on the ``` test ``` directory, we will get the following:
+```
+$ kustomize build overlays/test
+apiVersion: v1
+kind: Namespace
+metadata:
+  labels:
+    env: test
+  name: test
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: nginx
+    env: test
+  name: nginx-service
+  namespace: test
+spec:
+  ports:
+  - name: http
+    port: 80
+    protocol: TCP
+    targetPort: 80
+  selector:
+    app: nginx
+    env: test
+  type: LoadBalancer
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: nginx
+    env: test
+  name: nginx-deployment
+  namespace: test
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: nginx
+      env: test
+  template:
+    metadata:
+      labels:
+        app: nginx
+        env: test
+    spec:
+      containers:
+      - image: nginx
+        name: nginx
+        ports:
+        - containerPort: 80
+```
+
+Now, let’s apply this to our Kubernetes cluster using the following command:
+
+```
+$ kubectl apply -k overlays/test
+namespace/test created
+service/nginx-service created
+deployment.apps/nginx-deployment created
+```
+
+Similarly, let’s get the details of all resources deployed in the ``` test ``` namespace using the command below:
+```
+$ kubectl get all -n test --show-labels
+NAME                                    READY   STATUS    RESTARTS   AGE   LABELS
+pod/nginx-deployment-5d5fbdc544-5nj84   1/1     Running   0          34m   app=nginx,env=test,pod-template-hash=5d5fbdc544
+pod/nginx-deployment-5d5fbdc544-c8z2k   1/1     Running   0          34m   app=nginx,env=test,pod-template-hash=5d5fbdc544
+
+NAME                    TYPE           CLUSTER-IP      EXTERNAL-IP                                                              PORT(S)        AGE   LABELS
+service/nginx-service   LoadBalancer   172.20.131.13   adddc6dd4de8f4b4c9871431ad7edae5-112128047.us-west-2.elb.amazonaws.com   80:30934/TCP   34m   app=nginx,env=test
+
+NAME                               READY   UP-TO-DATE   AVAILABLE   AGE   LABELS
+deployment.apps/nginx-deployment   2/2     2            2           34m   app=nginx,env=test
+
+NAME                                          DESIRED   CURRENT   READY   AGE   LABELS
+replicaset.apps/nginx-deployment-5d5fbdc544   2         2         2       34m   app=nginx,env=test,pod-template-hash=5d5fbdc544
+
+```
+
+And as we see, we have a Deployment running two replicas this time.
+Let’s now move on to the ``` prod ``` example.
+
+#### The prod configuration
+
+The ``` prod ``` directory consists of the ``` namespace.yaml ``` similar to the test and dev configuration:
+
+```
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: prod
+```
+
+It also contains the following ``` deployment.yaml ``` patch manifest:
+
+```
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-deployment # necessary for Kustomize identification
+spec:
+  replicas: 3
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+    type: RollingUpdate
+```
+
+This patch contains three ``` Deployment ``` replicas, and also a deployment strategy section with type ``` RollingUpdate, maxSurge 1 ```, and ``` maxUnavailable 1 ```.
+Let’s now look at the ``` kustomization.yaml ``` file:
+
+```
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+bases:
+- ../../base
+
+commonLabels:
+  env: prod
+
+resources:
+  - namespace.yaml
+
+namespace: prod
+
+patchesStrategicMerge:
+  - deployment.yaml
+ ```
+ 
+This one is similar to what we had in test. Now, let’s go ahead and run ``` kustomize build ``` to see what we would get if apply it.
+
+
+
