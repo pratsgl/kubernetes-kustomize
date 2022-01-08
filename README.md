@@ -40,7 +40,7 @@ As we’ve installed Kustomize, let’s understand the problem statement and wha
 
 ### Problem Statement
 
-[<img src="kustomize-image.jpg" width="500"/>](kustomize-image.jpg)
+[<img src="kustomize-image-new.jpg" width="500"/>](kustomize-image-new.jpg)
 
 We have a web application that we want to deploy in several environments. It has the following environment-specific differences:
 1. It should contain an env label corresponding to the environment it is being deployed on (i.e., dev, test, and prod).
