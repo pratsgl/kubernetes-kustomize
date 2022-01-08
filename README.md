@@ -1,7 +1,5 @@
-
 ## Getting Started With Kustomize
-
-
+[<img src="k8s-titleimage.png" width="1000"/>](k8s-titleimage.png)
 
 ### Declarative management of Kubernetes resources with a hands-on example
 Kubernetes is one of the well-known container orchestrators and has led to the development of an entire ecosystem around it. It has allowed organizations to manage their container applications with ease by providing several resources to manage container deployments, replicas, scaling, service discovery, and networking through a single API Interface.
