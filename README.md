@@ -68,6 +68,7 @@ kustomize-example-app/
         └── service.yaml
    ```
    
-
+The ``` base ``` directory contains the base manifests and a ``` kustomization.yaml ``` file that contains all the common elements between the three environments. The ``` overlays ``` directory includes a directory each for ``` dev, test ```, and ``` prod ```. As we are simply changing the properties of both ``` Deployment ``` and ``` Service ``` resources in the dev, test, and prod environments, we have a manifest each for them. However, the manifests would only contain the differences between the resources.
+Let’s look at the ``` base ``` directory first.
 
 
