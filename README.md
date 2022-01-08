@@ -16,7 +16,7 @@ To understand better, let’s look at a hands-on example.
 ### Prerequisites
 You will need a Kubernetes cluster running Kubernetes version 1.14 or later and the kubectl CLI of a similar version.
 
-You would also need to fork https://github.com/bharatmicrosystems/kustomize-example-app repository.
+You would also need to fork https://github.com/pratsgl/kubernetes-kustomize/tree/main/kustomize-example-app repository.
 
 We would also need to install Kustomize. So, let’s look at that in the next section.
 
