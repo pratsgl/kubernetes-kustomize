@@ -1,4 +1,8 @@
+
 ## Getting Started With Kustomize
+
+
+
 ### Declarative management of Kubernetes resources with a hands-on example
 Kubernetes is one of the well-known container orchestrators and has led to the development of an entire ecosystem around it. It has allowed organizations to manage their container applications with ease by providing several resources to manage container deployments, replicas, scaling, service discovery, and networking through a single API Interface.
 Most organizations have multiple environments to develop and test these applications before deploying them into production. Configuration between these environments might differ, and there might be several aspects that you may want to tweak.
@@ -33,7 +37,9 @@ As we’ve installed Kustomize, let’s understand the problem statement and wha
 
 ### Problem Statement
 
-we have a web application that we want to deploy in several environments. It has the following environment-specific differences:
+[<img src="kustomize-image.jpg" width="500"/>](kustomize-image.jpg)
+
+We have a web application that we want to deploy in several environments. It has the following environment-specific differences:
 1. It should contain an env label corresponding to the environment it is being deployed on (i.e., dev, test, and prod).
 2. It should be deployed on namespaces corresponding to the environment (i.e., dev, test, and prod).
 3. The number of replicas in the dev environment should be one, two in test, and three in prod.
