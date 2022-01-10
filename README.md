@@ -15,6 +15,20 @@ When we do deployments across multiple environments there are cases where some t
 
 For eg, we created ``` base ``` a starting point for any further configurations. Then based on the environment (dev/test/prod) we create overalys. In these overalys, we again specify the things to be changed referencing a base called patches. The changes are applied on top of the base and the resultant output is called a variant. So if we create 3 overlays referencing the same base we get 3 variants to deploy based on the environment. This approach helps us to keep the base as clean as possible and only fiddle with the values that change across environments.
 
+### Kustomize offers some of the following benefits:
+
+#### Reusability
+With Kustomize you can reuse one of the base files across all environments (development, staging, production, etc.) and overlay specifications for each of those environments.
+
+#### Quick Generation
+Since Kustomize doesn’t utilize templates, a standard YAML file can be used to declare configurations.
+
+#### Debug Easily
+Using a YAML file allows easy debugging, along with patches that isolate configurations, allowing you to pinpoint the root cause of performance issues quickly. You can also compare performance to the base configuration and other variations that are running.
+
+#### Kubernetes Native Configuration
+Kustomize understands Kubernetes resources and their fields and is not just a simple text templating solution like other tools.
+
 ### How Kustomize Works
 Kustomize uses a file called ``` kustomization.yaml ``` that contains declarative specifications to what resources need to be imported from what manifest files and what changes need to be made. Once it has processed the resources, it emits them to the standard output, which can be stored in a file or directly used with kubectl to apply it to a particular cluster.
 One of the excellent use cases of Kustomize is to manage Kubernetes resources for multiple environments. For Kustomize to work in that scenario, you would need a base directory that would contain all manifest files with all the common elements and an overlays directory that contains all the differences for a particular environment.
@@ -578,8 +592,3 @@ And, as we see, we have three Pod ``` replicas ``` running now.
 #### Conclusion
 Obviously, this was a sneak peek into what Kustomize is and how we can use it effectively. There are a lot of other methods and ways to use Kustomize, and I think that would be an interesting piece to explore in future stories.
 Thanks for reading! I hope you enjoyed the article!
-
-
-
-
-
