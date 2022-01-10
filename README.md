@@ -408,9 +408,7 @@ spec:
         ports:
         - containerPort: 80
 ```
-
 Now, let’s apply this to our Kubernetes cluster using the following command:
-
 ```
 $ kubectl apply -k overlays/test
 namespace/test created
@@ -435,7 +433,6 @@ NAME                                          DESIRED   CURRENT   READY   AGE   
 replicaset.apps/nginx-deployment-5d5fbdc544   2         2         2       34m   app=nginx,env=test,pod-template-hash=5d5fbdc544
 
 ```
-
 And as we see, we have a Deployment running two replicas this time.
 Let’s now move on to the ``` prod ``` example.
 
@@ -556,7 +553,6 @@ namespace/prod created
 service/nginx-service created
 deployment.apps/nginx-deployment created
 ```
-
 Now, let’s list all resources in the ``` prod ``` namespace and see for ourselves:
 
 ```
